@@ -1,0 +1,13 @@
+[
+  { "name": "IA", "category": "metier" },
+  { "name": "Automatisation", "category": "metier" },
+  { "name": "Design produit", "category": "metier" },
+  { "name": "Dev web", "category": "metier" },
+  { "name": "Marketing & growth", "category": "pro" },
+  { "name": "Business & strategie", "category": "pro" },
+  { "name": "Carriere", "category": "pro" },
+  { "name": "Inspiration perso", "category": "perso" },
+  { "name": "Bien-etre", "category": "perso" },
+  { "name": "Culture generale", "category": "culture" },
+  { "name": "Societe & tendances", "category": "culture" }
+]
