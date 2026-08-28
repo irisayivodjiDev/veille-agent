@@ -1,0 +1,7 @@
+node_modules
+.env
+
+# base de données de l'app de veille
+state_db/veille.db
+state_db/veille.db-shm
+state_db/veille.db-wal

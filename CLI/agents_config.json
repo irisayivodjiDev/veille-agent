@@ -1,0 +1,10 @@
+{
+  "api_url": "http://localhost:8080",
+  "agents": [
+    {
+      "id": "Agent",
+      "name": "Agent",
+      "description": "Agent spécialisé pour les informations météo"
+    }
+  ]
+} 
