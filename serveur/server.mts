@@ -9,6 +9,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { getAgent, getAgentsMetadata } from './agents-registry.mts';
+import '../db/db.mts';
+import { listFolders, listTags } from '../db/repository.mts';
+import { articlesRouter } from './routes/articles.mts';
+import { reposts } from './routes/reposts.mts';
+import { sourcesRouter } from './routes/sources.mts';
+import { startTelegramBot } from './telegram.mts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -131,6 +137,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.text());
 
+// Routes de l'app de veille (capter / qualifier / ranger / republier)
+app.use('/api/sources', sourcesRouter);
+app.use('/api/articles', articlesRouter);
+app.use('/api', reposts);
+
+app.get('/api/folders', (_req: Request, res: Response) => {
+  res.json(listFolders());
+});
+
+app.get('/api/tags', (_req: Request, res: Response) => {
+  res.json(listTags());
+});
+
 // Routes
 app.get('/health', async (req: Request, res: Response) => {
   try {
@@ -173,13 +192,13 @@ app.get('/agents', authenticateToken, async (req: Request, res: Response) => {
 app.post('/:agentId/invoke', authenticateToken, async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const userInput: UserInput = req.body;
-
+  
   try {
     console.log(`🤖 Invocation de l'agent ${agentId} pour le thread ${userInput.thread_id || 'nouveau'}`);
-
+    
     const threadId = userInput.thread_id || uuidv4();
     const runId = uuidv4();
-
+    
     // Récupérer l'agent depuis le registre
     const agent = getAgent(agentId);
 
@@ -218,7 +237,7 @@ app.post('/:agentId/invoke', authenticateToken, async (req: Request, res: Respon
     };
 
     res.json(agentResponse);
-
+    
   } catch (error) {
     console.error('❌ Erreur lors de l\'invocation:', error);
     res.status(500).json({
@@ -231,13 +250,13 @@ app.post('/:agentId/invoke', authenticateToken, async (req: Request, res: Respon
 app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const userInput: UserInput = req.body;
-
+  
   try {
     console.log(`🌊 Streaming avec l'agent ${agentId} pour le thread ${userInput.thread_id || 'nouveau'}`);
-
+    
     const threadId = userInput.thread_id || uuidv4();
     const runId = uuidv4();
-
+    
     // Récupérer l'agent depuis le registre
     const agent = getAgent(agentId);
 
@@ -283,24 +302,24 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
       try {
         // Utiliser le vrai streaming pour capturer les événements d'outils
         const stream = await agent.stream(input, config);
-
+        
         for await (const chunk of stream) {
           if (!activeGenerations.get(threadId)) {
             break; // Génération arrêtée
           }
-
+          
           console.log('📦 Chunk reçu:', JSON.stringify(chunk, null, 2));
-
+          
           // Traiter les différents nœuds du graphe
           for (const [nodeName, nodeData] of Object.entries(chunk)) {
             if (nodeName === '__start__') continue;
-
+            
             console.log(`🔄 Nœud: ${nodeName}`, nodeData);
-
+            
             // Traiter les messages dans nodeData
             if (nodeData && typeof nodeData === 'object' && 'messages' in nodeData) {
               const messages = (nodeData as any).messages || [];
-
+              
               for (const message of messages) {
                 // Détecter les appels d'outils
                 if (message.tool_calls && Array.isArray(message.tool_calls)) {
@@ -312,7 +331,7 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
                     });
                   }
                 }
-
+                
                 // Détecter les résultats d'outils
                 if (message.tool_call_id && message.content) {
                   sendSSE('tool_execution_complete', {
@@ -321,12 +340,12 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
                     id: message.tool_call_id
                   });
                 }
-
+                
                 // Messages normaux de l'agent
                 if (message.content && !message.tool_call_id && nodeName === 'agent') {
                   const content = typeof message.content === 'string' ? message.content : JSON.stringify(message.content);
                   fullResponse += content;
-
+                  
                   // Envoyer le contenu par petits chunks
                   const chunks = content.match(/.{1,10}/g) || [content];
                   for (const textChunk of chunks) {
@@ -359,7 +378,7 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
 
       // Terminer le streaming
       sendSSE('stream_end', { thread_id: threadId });
-
+      
     } catch (error) {
       console.error('❌ Erreur pendant le streaming:', error);
       sendSSE('error', (error as Error).message);
@@ -374,7 +393,7 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
       console.log(`🔌 Client déconnecté pour le thread ${threadId}`);
       activeGenerations.set(threadId, false);
     });
-
+    
   } catch (error) {
     console.error('❌ Erreur lors du streaming:', error);
     res.status(500).json({
@@ -387,14 +406,14 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
 app.post('/:agentId/stop', authenticateToken, async (req: Request, res: Response) => {
   const { agentId } = req.params;
   const { thread_id } = req.body;
-
+  
   try {
     console.log(`🛑 Arrêt de la génération pour l'agent ${agentId}, thread ${thread_id}`);
-
+    
     if (thread_id && activeGenerations.has(thread_id)) {
       activeGenerations.set(thread_id, false);
       setTimeout(() => activeGenerations.delete(thread_id), 1000); // Nettoyer après 1 seconde
-
+      
       res.json({
         status: 'success',
         message: 'Génération arrêtée avec succès'
@@ -405,7 +424,7 @@ app.post('/:agentId/stop', authenticateToken, async (req: Request, res: Response
         message: 'Aucune génération active à arrêter'
       });
     }
-
+    
   } catch (error) {
     console.error('❌ Erreur lors de l\'arrêt:', error);
     res.status(500).json({
@@ -418,7 +437,7 @@ app.post('/:agentId/stop', authenticateToken, async (req: Request, res: Response
 // Route pour obtenir l'historique d'une conversation
 app.get('/conversations/:threadId', authenticateToken, async (req: Request, res: Response) => {
   const { threadId } = req.params;
-
+  
   try {
     const conversation = conversations.get(threadId);
     if (!conversation) {
@@ -427,9 +446,9 @@ app.get('/conversations/:threadId', authenticateToken, async (req: Request, res:
         message: `Aucune conversation trouvée pour le thread ${threadId}`
       });
     }
-
+    
     res.json(conversation);
-
+    
   } catch (error) {
     console.error('❌ Erreur lors de la récupération de la conversation:', error);
     res.status(500).json({
@@ -449,9 +468,9 @@ app.get('/conversations', authenticateToken, async (req: Request, res: Response)
       updated_at: conv.updated_at,
       last_message: conv.messages[conv.messages.length - 1]?.content.slice(0, 100) || 'Aucun message'
     }));
-
+    
     res.json(conversationList);
-
+    
   } catch (error) {
     console.error('❌ Erreur lors de la récupération des conversations:', error);
     res.status(500).json({
@@ -476,8 +495,19 @@ app.use('*', (req: Request, res: Response) => {
       'POST /:agentId/stream',
       'POST /:agentId/stop',
       'GET /conversations',
-      'GET /conversations/:threadId'
-    ]
+      'GET /conversations/:threadId',
+      'GET /api/sources',
+      'POST /api/sources',
+      'POST /api/sources/:id/process',
+      'GET /api/articles',
+      'GET /api/articles/:id',
+      'PATCH /api/articles/:id/tags',
+      'POST /api/articles/:id/repost',
+      'PATCH /api/reposts/:id',
+      'GET /api/folders',
+      'GET /api/tags'
+    ],
+    note: "Ceci est l'API backend (JSON). L'interface web de l'app de veille tourne séparément sur le frontend Vite."
   });
 });
 
@@ -507,7 +537,7 @@ async function startServer() {
       console.log('💡 Pour tester avec le CLI:');
       console.log('  npm run cli check');
       console.log('  npm run cli chat');
-
+      
       // Charger et afficher les agents disponibles
       loadAgentsConfig().then(agents => {
         console.log('');
@@ -517,6 +547,17 @@ async function startServer() {
           console.log(`    ${agent.description}`);
         });
       });
+
+      console.log('');
+      console.log('📰 App de veille:');
+      console.log(`  GET  /api/sources                - Sources capturées`);
+      console.log(`  POST /api/sources                - Capturer (url ou text)`);
+      console.log(`  POST /api/sources/:id/process     - Qualifier + ranger`);
+      console.log(`  GET  /api/articles                - Articles (folderId=, tag=)`);
+      console.log(`  PATCH /api/articles/:id/tags       - Correction manuelle des tags`);
+      console.log(`  POST /api/articles/:id/repost      - Republier avec valeur ajoutée`);
+
+      startTelegramBot();
     });
   } catch (error) {
     console.error('❌ Erreur lors du démarrage du serveur:', error);
