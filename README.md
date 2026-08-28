@@ -2,6 +2,65 @@
 
 Un CLI et serveur JavaScript/TypeScript pour tester et interagir avec des agents IA.
 
+## 📰 App de veille (projet)
+
+En plus du squelette d'origine, ce dépôt contient une web app de veille en 4 temps :
+**capter → qualifier → ranger → republier avec valeur ajoutée**, avec le modèle de données
+imposé Source → Article → Tags.
+
+### Démarrage
+
+```bash
+# 1. Backend (API + agents + bot Telegram)
+cp .env.example .env   # puis remplir TELEGRAM_BOT_TOKEN si besoin
+npm install
+npm run server          # http://localhost:8080
+
+# 2. Frontend (React + Vite), dans un second terminal
+cd frontend
+npm install
+npm run dev              # http://localhost:5173 (proxy /api -> :8080)
+```
+
+LM Studio doit tourner en local (`http://localhost:1234`) avec le modèle défini dans
+`LMSTUDIO_MODEL` (`.env`) chargé et le "Local Server" démarré (onglet Developer de LM Studio).
+
+### Ce qui est implémenté (socle minimum)
+
+- **Capter** : formulaire web (`POST /api/sources`, page "Capter" du frontend) + bot Telegram
+  (`serveur/telegram.mts`, actif si `TELEGRAM_BOT_TOKEN` est renseigné dans `.env` — créer un bot
+  via [@BotFather](https://t.me/BotFather)).
+- **Qualifier** : agent LangGraph (`Agents/Qualifier/Qualifier.mts`) qui extrait le contenu (scraping
+  d'URL via `@extractus/article-extractor`, ou texte brut), puis appelle le LLM local avec une sortie
+  JSON **contrainte par schéma** (`response_format: json_schema`, voir `Agents/parseJson.mts`) pour
+  obtenir titre, résumé, nature, légitimité, pourquoi c'est intéressant, en quoi ça augmente le
+  lecteur, et catégorie (métier/pro/perso/culture).
+- **Ranger** : le même agent choisit un dossier (`config/folders.json`, pré-défini, filtré pour
+  rester cohérent avec la catégorie déterminée) et plusieurs tags. Modèle Source → Article → Tags
+  en base SQLite (`db/schema.sql`). Correction manuelle possible (`PATCH /api/articles/:id/tags`,
+  UI dans le détail d'un article).
+- **Republier** : `Agents/Republisher/Republisher.mts` génère un post à valeur ajoutée (posture de
+  marque, voix définie dans `config/brand.md` — **à personnaliser**) à partir d'un article qualifié.
+  Le texte est éditable et peut être marqué "publié" (`POST /api/articles/:id/repost`,
+  `PATCH /api/reposts/:id`).
+
+### Limitations connues / bonus restants
+
+- Le modèle par défaut (`dolphin3.0-llama3.1-8b`) plantait au chargement sur cette machine
+  (erreur mémoire GPU/Vulkan) ; les tests ont été faits avec `llama-3.2-1b-instruct` (plus léger
+  mais moins précis sur les tags). Repasser sur un modèle plus costaud dans `.env`
+  (`LMSTUDIO_MODEL`) une fois le souci GPU réglé (cf. réglages Runtime/GPU Offload de LM Studio).
+- Bonus non commencés : agent de pertinence (réactions/commentaires), capture dictaphone terrain
+  (transcription locale), skills SEO.
+
+### Variables d'environnement (`.env`, voir `.env.example`)
+
+| Variable | Rôle |
+|---|---|
+| `LMSTUDIO_BASE_URL` / `LMSTUDIO_MODEL` | Serveur local LM Studio (OpenAI-compatible) |
+| `APP_DB_PATH` | Fichier SQLite de l'app (séparé du checkpointer LangGraph) |
+| `TELEGRAM_BOT_TOKEN` | Token du bot Telegram (capture) — optionnel |
+
 ## 📦 Installation
 
 ```bash
@@ -269,4 +328,4 @@ MIT
 
 ---
 
-🚀 **Prêt à discuter avec vos agents IA !**
+🚀 **Prêt à discuter avec vos agents IA !** 
