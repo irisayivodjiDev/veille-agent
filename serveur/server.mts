@@ -12,6 +12,7 @@ import { getAgent, getAgentsMetadata } from './agents-registry.mts';
 import '../db/db.mts';
 import { listFolders, listTags } from '../db/repository.mts';
 import { articlesRouter } from './routes/articles.mts';
+import { reactions } from './routes/reactions.mts';
 import { reposts } from './routes/reposts.mts';
 import { sourcesRouter } from './routes/sources.mts';
 import { startTelegramBot } from './telegram.mts';
@@ -141,6 +142,7 @@ app.use(express.text());
 app.use('/api/sources', sourcesRouter);
 app.use('/api/articles', articlesRouter);
 app.use('/api', reposts);
+app.use('/api', reactions);
 
 app.get('/api/folders', (_req: Request, res: Response) => {
   res.json(listFolders());
@@ -504,6 +506,8 @@ app.use('*', (req: Request, res: Response) => {
       'PATCH /api/articles/:id/tags',
       'POST /api/articles/:id/repost',
       'PATCH /api/reposts/:id',
+      'GET /api/articles/:id/reactions',
+      'POST /api/articles/:id/reactions',
       'GET /api/folders',
       'GET /api/tags'
     ],
@@ -556,6 +560,7 @@ async function startServer() {
       console.log(`  GET  /api/articles                - Articles (folderId=, tag=)`);
       console.log(`  PATCH /api/articles/:id/tags       - Correction manuelle des tags`);
       console.log(`  POST /api/articles/:id/repost      - Republier avec valeur ajoutée`);
+      console.log(`  POST /api/articles/:id/reactions   - Analyser des reactions (pertinence)`);
 
       startTelegramBot();
     });
