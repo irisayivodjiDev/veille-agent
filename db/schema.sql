@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS articles (
   augmentation_note TEXT NOT NULL,
   category TEXT NOT NULL,
   folder_id INTEGER REFERENCES folders(id),
-  qualified_at TEXT NOT NULL
+  qualified_at TEXT NOT NULL,
+  relevance_score REAL NOT NULL DEFAULT 0,
+  mood_summary TEXT
 );
 
 CREATE TABLE IF NOT EXISTS tags (
@@ -49,4 +51,13 @@ CREATE TABLE IF NOT EXISTS reposts (
   content TEXT NOT NULL,
   created_at TEXT NOT NULL,
   published INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS reactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  article_id INTEGER NOT NULL REFERENCES articles(id),
+  text TEXT NOT NULL,
+  sentiment TEXT NOT NULL CHECK(sentiment IN ('positive','negative','neutral')),
+  reason TEXT NOT NULL,
+  collected_at TEXT NOT NULL
 );

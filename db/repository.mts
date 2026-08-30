@@ -5,6 +5,7 @@ export type RawType = 'url' | 'text' | 'audio';
 export type SourceStatus = 'pending' | 'processed' | 'rejected' | 'error';
 export type Category = 'metier' | 'pro' | 'perso' | 'culture';
 export type TagOrigin = 'ai' | 'manual';
+export type Sentiment = 'positive' | 'negative' | 'neutral';
 
 export interface SourceRow {
   id: number;
@@ -36,6 +37,8 @@ export interface ArticleRow {
   category: Category;
   folder_id: number | null;
   qualified_at: string;
+  relevance_score: number;
+  mood_summary: string | null;
 }
 
 export interface TagRow {
@@ -50,6 +53,15 @@ export interface RepostRow {
   content: string;
   created_at: string;
   published: number;
+}
+
+export interface ReactionRow {
+  id: number;
+  article_id: number;
+  text: string;
+  sentiment: Sentiment;
+  reason: string;
+  collected_at: string;
 }
 
 // ---- Sources ----
@@ -215,4 +227,42 @@ export function updateRepost(id: number, input: { content?: string; published?: 
   const published = input.published === undefined ? current.published : input.published ? 1 : 0;
   db.prepare('UPDATE reposts SET content = ?, published = ? WHERE id = ?').run(content, published, id);
   return db.prepare('SELECT * FROM reposts WHERE id = ?').get(id) as RepostRow;
+}
+
+// ---- Réactions (agent de pertinence) ----
+
+export function createReactions(
+  articleId: number,
+  reactions: { text: string; sentiment: Sentiment; reason: string }[]
+): ReactionRow[] {
+  const insert = db.prepare(`
+    INSERT INTO reactions (article_id, text, sentiment, reason, collected_at)
+    VALUES (@article_id, @text, @sentiment, @reason, @collected_at)
+  `);
+  const collected_at = new Date().toISOString();
+  const tx = db.transaction((rows: typeof reactions) => {
+    for (const row of rows) {
+      insert.run({ article_id: articleId, collected_at, ...row });
+    }
+  });
+  tx(reactions);
+  return listReactionsForArticle(articleId);
+}
+
+export function listReactionsForArticle(articleId: number): ReactionRow[] {
+  return db
+    .prepare('SELECT * FROM reactions WHERE article_id = ? ORDER BY collected_at DESC')
+    .all(articleId) as ReactionRow[];
+}
+
+export function updateArticleRelevance(
+  articleId: number,
+  input: { relevance_score: number; mood_summary: string }
+): ArticleRow {
+  db.prepare('UPDATE articles SET relevance_score = ?, mood_summary = ? WHERE id = ?').run(
+    input.relevance_score,
+    input.mood_summary,
+    articleId
+  );
+  return getArticle(articleId)!;
 }
