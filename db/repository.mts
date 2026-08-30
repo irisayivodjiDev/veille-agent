@@ -224,6 +224,10 @@ export function listRepostsForArticle(articleId: number): RepostRow[] {
     .all(articleId) as RepostRow[];
 }
 
+export function getRepost(id: number): RepostRow | undefined {
+  return db.prepare('SELECT * FROM reposts WHERE id = ?').get(id) as RepostRow | undefined;
+}
+
 export function updateRepost(id: number, input: { content?: string; published?: boolean }): RepostRow {
   const current = db.prepare('SELECT * FROM reposts WHERE id = ?').get(id) as RepostRow;
   const content = input.content ?? current.content;
@@ -234,11 +238,14 @@ export function updateRepost(id: number, input: { content?: string; published?: 
 
 export function updateRepostSeo(
   id: number,
-  input: { content: string; seo_title: string; seo_description: string; seo_keywords: string[] }
+  input: { seo_title: string; seo_description: string; seo_keywords: string[] }
 ): RepostRow {
-  db.prepare(
-    'UPDATE reposts SET content = ?, seo_title = ?, seo_description = ?, seo_keywords = ? WHERE id = ?'
-  ).run(input.content, input.seo_title, input.seo_description, input.seo_keywords.join(', '), id);
+  db.prepare('UPDATE reposts SET seo_title = ?, seo_description = ?, seo_keywords = ? WHERE id = ?').run(
+    input.seo_title,
+    input.seo_description,
+    input.seo_keywords.join(', '),
+    id
+  );
   return db.prepare('SELECT * FROM reposts WHERE id = ?').get(id) as RepostRow;
 }
 
