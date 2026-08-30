@@ -19,23 +19,20 @@ const schema = fs.readFileSync(join(__dirname, 'schema.sql'), 'utf-8');
 db.exec(schema);
 
 // CREATE TABLE IF NOT EXISTS ne modifie pas une table deja existante : sur une
-// base creee avant l'ajout de l'agent de pertinence, ces colonnes manquent
-// encore. On les ajoute ici si besoin, une seule fois.
-function migrateArticlesColumns() {
-  const columns = db.prepare('PRAGMA table_info(articles)').all() as { name: string }[];
-  const names = new Set(columns.map((c) => c.name));
-
-  if (!names.has('relevance_score')) {
-    db.exec('ALTER TABLE articles ADD COLUMN relevance_score REAL NOT NULL DEFAULT 0');
-    console.log('✅ Migration: colonne articles.relevance_score ajoutée');
-  }
-  if (!names.has('mood_summary')) {
-    db.exec('ALTER TABLE articles ADD COLUMN mood_summary TEXT');
-    console.log('✅ Migration: colonne articles.mood_summary ajoutée');
-  }
+// base creee avant l'ajout d'une fonctionnalite, les nouvelles colonnes
+// manquent encore. On les ajoute ici si besoin, une seule fois.
+function addColumnIfMissing(table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (columns.some((c) => c.name === column)) return;
+  db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  console.log(`✅ Migration: colonne ${table}.${column} ajoutée`);
 }
 
-migrateArticlesColumns();
+addColumnIfMissing('articles', 'relevance_score', 'REAL NOT NULL DEFAULT 0');
+addColumnIfMissing('articles', 'mood_summary', 'TEXT');
+addColumnIfMissing('reposts', 'seo_title', 'TEXT');
+addColumnIfMissing('reposts', 'seo_description', 'TEXT');
+addColumnIfMissing('reposts', 'seo_keywords', 'TEXT');
 
 function seedFolders() {
   const count = (db.prepare('SELECT COUNT(*) as n FROM folders').get() as { n: number }).n;

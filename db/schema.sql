@@ -50,7 +50,10 @@ CREATE TABLE IF NOT EXISTS reposts (
   platform TEXT NOT NULL,
   content TEXT NOT NULL,
   created_at TEXT NOT NULL,
-  published INTEGER NOT NULL DEFAULT 0
+  published INTEGER NOT NULL DEFAULT 0,
+  seo_title TEXT,
+  seo_description TEXT,
+  seo_keywords TEXT
 );
 
 CREATE TABLE IF NOT EXISTS reactions (

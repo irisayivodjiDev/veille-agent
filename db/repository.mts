@@ -53,6 +53,9 @@ export interface RepostRow {
   content: string;
   created_at: string;
   published: number;
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_keywords: string | null;
 }
 
 export interface ReactionRow {
@@ -226,6 +229,16 @@ export function updateRepost(id: number, input: { content?: string; published?: 
   const content = input.content ?? current.content;
   const published = input.published === undefined ? current.published : input.published ? 1 : 0;
   db.prepare('UPDATE reposts SET content = ?, published = ? WHERE id = ?').run(content, published, id);
+  return db.prepare('SELECT * FROM reposts WHERE id = ?').get(id) as RepostRow;
+}
+
+export function updateRepostSeo(
+  id: number,
+  input: { content: string; seo_title: string; seo_description: string; seo_keywords: string[] }
+): RepostRow {
+  db.prepare(
+    'UPDATE reposts SET content = ?, seo_title = ?, seo_description = ?, seo_keywords = ? WHERE id = ?'
+  ).run(input.content, input.seo_title, input.seo_description, input.seo_keywords.join(', '), id);
   return db.prepare('SELECT * FROM reposts WHERE id = ?').get(id) as RepostRow;
 }
 
