@@ -506,6 +506,7 @@ app.use('*', (req: Request, res: Response) => {
       'PATCH /api/articles/:id/tags',
       'POST /api/articles/:id/repost',
       'PATCH /api/reposts/:id',
+      'POST /api/reposts/:id/seo',
       'GET /api/articles/:id/reactions',
       'POST /api/articles/:id/reactions',
       'GET /api/folders',
@@ -561,6 +562,7 @@ async function startServer() {
       console.log(`  PATCH /api/articles/:id/tags       - Correction manuelle des tags`);
       console.log(`  POST /api/articles/:id/repost      - Republier avec valeur ajoutée`);
       console.log(`  POST /api/articles/:id/reactions   - Analyser des reactions (pertinence)`);
+      console.log(`  POST /api/reposts/:id/seo          - Optimiser le SEO d'un repost`);
 
       startTelegramBot();
     });

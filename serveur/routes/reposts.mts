@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { runRepublisher } from '../../Agents/Republisher/Republisher.mts';
-import { createRepost, getArticle, updateRepost } from '../../db/repository.mts';
+import { runSeoOptimizer } from '../../Agents/SEO/SEO.mts';
+import { createRepost, getArticle, getRepost, updateRepost } from '../../db/repository.mts';
 
 export const reposts = Router();
 
@@ -28,4 +29,20 @@ reposts.patch('/reposts/:id', (req, res) => {
   const { content, published } = req.body as { content?: string; published?: boolean };
   const repost = updateRepost(id, { content, published });
   res.json(repost);
+});
+
+reposts.post('/reposts/:id/seo', async (req, res) => {
+  const id = Number(req.params.id);
+  const repost = getRepost(id);
+  if (!repost) {
+    return res.status(404).json({ error: 'Repost introuvable' });
+  }
+
+  try {
+    const updated = await runSeoOptimizer(id);
+    res.json(updated);
+  } catch (err) {
+    console.error('❌ Erreur agent SEO:', err);
+    res.status(500).json({ error: (err as Error).message });
+  }
 });
