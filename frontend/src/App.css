@@ -45,6 +45,13 @@ input, textarea, select {
   font-family: inherit;
 }
 
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
 .page h2 {
   margin-top: 0;
 }
@@ -180,6 +187,18 @@ input, textarea, select {
 
 .tag-manual {
   background: #e0ecff;
+}
+
+.tag-sentiment-positive {
+  background: #d4f4dd;
+}
+
+.tag-sentiment-negative {
+  background: #fbdada;
+}
+
+.tag-sentiment-neutral {
+  background: #eef1f4;
 }
 
 .tag-remove {

@@ -36,6 +36,8 @@ export interface ArticleRow {
   folder: FolderRow | null;
   qualified_at: string;
   tags: TagRow[];
+  relevance_score: number;
+  mood_summary: string | null;
 }
 
 export interface RepostRow {
@@ -45,6 +47,15 @@ export interface RepostRow {
   content: string;
   created_at: string;
   published: number;
+}
+
+export interface ReactionRow {
+  id: number;
+  article_id: number;
+  text: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  reason: string;
+  collected_at: string;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -85,4 +96,11 @@ export const api = {
     request<RepostRow>(`/articles/${articleId}/repost`, { method: 'POST', body: JSON.stringify({ platform }) }),
   updateRepost: (id: number, input: { content?: string; published?: boolean }) =>
     request<RepostRow>(`/reposts/${id}`, { method: 'PATCH', body: JSON.stringify(input) }),
+
+  listReactions: (articleId: number) => request<ReactionRow[]>(`/articles/${articleId}/reactions`),
+  analyzeReactions: (articleId: number, text: string) =>
+    request<{ article: ArticleRow; reactions: ReactionRow[] }>(`/articles/${articleId}/reactions`, {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    }),
 };

@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
-import { api, type ArticleRow, type RepostRow } from '../api';
+import { api, type ArticleRow, type ReactionRow, type RepostRow } from '../api';
 
 const PLATFORMS = ['linkedin', 'x', 'blog'];
+
+const SENTIMENT_LABEL: Record<ReactionRow['sentiment'], string> = {
+  positive: 'Positif',
+  negative: 'Négatif',
+  neutral: 'Neutre',
+};
 
 export function ArticleDetailPage({ articleId, onBack }: { articleId: number; onBack: () => void }) {
   const [article, setArticle] = useState<(ArticleRow & { reposts: RepostRow[] }) | null>(null);
@@ -11,12 +17,17 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
   const [generating, setGenerating] = useState(false);
   const [repostError, setRepostError] = useState<string | null>(null);
   const [draft, setDraft] = useState<RepostRow | null>(null);
+  const [reactionsList, setReactionsList] = useState<ReactionRow[]>([]);
+  const [reactionInput, setReactionInput] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
+  const [reactionsError, setReactionsError] = useState<string | null>(null);
 
   async function refresh() {
     try {
       const data = await api.getArticle(articleId);
       setArticle(data);
       setDraft(data.reposts[0] ?? null);
+      setReactionsList(await api.listReactions(articleId));
     } catch (err) {
       setLoadError((err as Error).message);
     }
@@ -62,6 +73,21 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
     if (!draft) return;
     const updated = await api.updateRepost(draft.id, { published: !draft.published });
     setDraft(updated);
+  }
+
+  async function handleAnalyzeReactions() {
+    if (!reactionInput.trim()) return;
+    setAnalyzing(true);
+    setReactionsError(null);
+    try {
+      await api.analyzeReactions(articleId, reactionInput);
+      setReactionInput('');
+      await refresh();
+    } catch (err) {
+      setReactionsError((err as Error).message);
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   if (loadError) return <p className="error">{loadError}</p>;
@@ -137,6 +163,35 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
             </div>
           </div>
         )}
+      </section>
+
+      <section>
+        <h3>Pertinence (bonus)</h3>
+        <p>
+          <strong>Score de pertinence</strong> : {Math.round(article.relevance_score * 100)}%
+          {article.mood_summary && <> — {article.mood_summary}</>}
+        </p>
+
+        <div className="tag-list">
+          {reactionsList.map((r) => (
+            <span key={r.id} className={`tag tag-sentiment-${r.sentiment}`} title={r.reason}>
+              {SENTIMENT_LABEL[r.sentiment]} : {r.text}
+            </span>
+          ))}
+        </div>
+
+        <textarea
+          rows={4}
+          placeholder={'Colle des réactions/commentaires, une par ligne...'}
+          value={reactionInput}
+          onChange={(e) => setReactionInput(e.target.value)}
+        />
+        <div className="capture-form">
+          <button disabled={analyzing} onClick={handleAnalyzeReactions}>
+            {analyzing ? 'Analyse...' : 'Analyser les réactions'}
+          </button>
+        </div>
+        {reactionsError && <p className="error">{reactionsError}</p>}
       </section>
     </div>
   );
