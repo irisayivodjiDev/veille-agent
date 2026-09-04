@@ -47,6 +47,9 @@ export interface RepostRow {
   content: string;
   created_at: string;
   published: number;
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_keywords: string | null;
 }
 
 export interface ReactionRow {
@@ -103,4 +106,6 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ text }),
     }),
+
+  optimizeSeo: (repostId: number) => request<RepostRow>(`/reposts/${repostId}/seo`, { method: 'POST' }),
 };
