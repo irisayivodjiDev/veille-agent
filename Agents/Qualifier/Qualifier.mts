@@ -40,6 +40,7 @@ type QualifierState = {
   sourceId: number;
   extractedTitle: string | null;
   extractedText: string;
+  extractedImageUrl: string | null;
   qualification: Qualification | null;
   ranking: Ranking | null;
   articleId: number | null;
@@ -56,14 +57,14 @@ async function extractNode(state: QualifierState): Promise<Partial<QualifierStat
 
   try {
     if (source.raw_type === 'url' && source.raw_url) {
-      const { title, text } = await extractFromUrl(source.raw_url);
-      return { extractedTitle: title, extractedText: text };
+      const { title, text, imageUrl } = await extractFromUrl(source.raw_url);
+      return { extractedTitle: title, extractedText: text, extractedImageUrl: imageUrl };
     }
     const text = source.transcript || source.raw_text || '';
     if (!text.trim()) {
       return { error: "Source vide : rien à qualifier" };
     }
-    return { extractedTitle: null, extractedText: text };
+    return { extractedTitle: null, extractedText: text, extractedImageUrl: null };
   } catch (err) {
     return { error: `Extraction impossible : ${(err as Error).message}` };
   }
@@ -186,6 +187,7 @@ async function persistNode(state: QualifierState): Promise<Partial<QualifierStat
     augmentation_note: state.qualification.augmentation_note,
     category: state.qualification.category,
     folder_id: folder?.id ?? null,
+    image_url: state.extractedImageUrl,
   });
 
   setArticleTags(article.id, state.ranking.tags, 'ai');
@@ -207,6 +209,7 @@ const builder = new StateGraph<QualifierState>({
     sourceId: { default: () => 0, reducer: overwrite<number> },
     extractedTitle: { default: () => null, reducer: overwrite<string | null> },
     extractedText: { default: () => '', reducer: overwrite<string> },
+    extractedImageUrl: { default: () => null, reducer: overwrite<string | null> },
     qualification: { default: () => null, reducer: overwrite<Qualification | null> },
     ranking: { default: () => null, reducer: overwrite<Ranking | null> },
     articleId: { default: () => null, reducer: overwrite<number | null> },

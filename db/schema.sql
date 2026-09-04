@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS articles (
   folder_id INTEGER REFERENCES folders(id),
   qualified_at TEXT NOT NULL,
   relevance_score REAL NOT NULL DEFAULT 0,
-  mood_summary TEXT
+  mood_summary TEXT,
+  image_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS tags (

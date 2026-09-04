@@ -76,23 +76,35 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
           {articles.map((a) => (
             <div
               key={a.id}
-              className={`${card} cursor-pointer transition-shadow hover:shadow-md hover:shadow-pink-200/70`}
+              className={`${card} cursor-pointer overflow-hidden p-0! transition-shadow hover:shadow-md hover:shadow-pink-200/70`}
               onClick={() => onSelect(a.id)}
             >
-              <div className="flex items-start justify-between gap-2">
-                <strong className="font-semibold text-slate-900">{a.title}</strong>
-                {a.folder && <span className={badge}>{a.folder.name}</span>}
-              </div>
-              <p className={`${mutedText} mt-1 line-clamp-3`}>{a.summary}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {a.tags.map((t) => (
-                  <span
-                    key={t.id}
-                    className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-sm font-medium text-slate-700"
-                  >
-                    {t.name}
-                  </span>
-                ))}
+              {a.image_url && (
+                <img
+                  src={a.image_url}
+                  alt=""
+                  className="h-32 w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <strong className="font-semibold text-slate-900">{a.title}</strong>
+                  {a.folder && <span className={badge}>{a.folder.name}</span>}
+                </div>
+                <p className={`${mutedText} mt-1 line-clamp-3`}>{a.summary}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {a.tags.map((t) => (
+                    <span
+                      key={t.id}
+                      className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-sm font-medium text-slate-700"
+                    >
+                      {t.name}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

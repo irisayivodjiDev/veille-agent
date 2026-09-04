@@ -143,6 +143,17 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
         </div>
       </div>
 
+      {article.image_url && (
+        <img
+          src={article.image_url}
+          alt=""
+          className="h-48 w-full rounded-2xl object-cover shadow-sm shadow-pink-100"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      )}
+
       <div className={card}>
         <h3 className={sectionTitle}>Qualification</h3>
         <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">

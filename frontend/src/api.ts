@@ -38,6 +38,7 @@ export interface ArticleRow {
   tags: TagRow[];
   relevance_score: number;
   mood_summary: string | null;
+  image_url: string | null;
 }
 
 export interface RepostRow {

@@ -33,6 +33,7 @@ addColumnIfMissing('articles', 'mood_summary', 'TEXT');
 addColumnIfMissing('reposts', 'seo_title', 'TEXT');
 addColumnIfMissing('reposts', 'seo_description', 'TEXT');
 addColumnIfMissing('reposts', 'seo_keywords', 'TEXT');
+addColumnIfMissing('articles', 'image_url', 'TEXT');
 
 function seedFolders() {
   const count = (db.prepare('SELECT COUNT(*) as n FROM folders').get() as { n: number }).n;

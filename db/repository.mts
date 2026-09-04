@@ -39,6 +39,7 @@ export interface ArticleRow {
   qualified_at: string;
   relevance_score: number;
   mood_summary: string | null;
+  image_url: string | null;
 }
 
 export interface TagRow {
@@ -144,14 +145,19 @@ export function createArticle(input: {
   augmentation_note: string;
   category: Category;
   folder_id: number | null;
+  image_url?: string | null;
 }): ArticleRow {
   const stmt = db.prepare(`
     INSERT INTO articles
-      (source_id, title, summary, nature, legitimacy_note, why_interesting, augmentation_note, category, folder_id, qualified_at)
+      (source_id, title, summary, nature, legitimacy_note, why_interesting, augmentation_note, category, folder_id, qualified_at, image_url)
     VALUES
-      (@source_id, @title, @summary, @nature, @legitimacy_note, @why_interesting, @augmentation_note, @category, @folder_id, @qualified_at)
+      (@source_id, @title, @summary, @nature, @legitimacy_note, @why_interesting, @augmentation_note, @category, @folder_id, @qualified_at, @image_url)
   `);
-  const result = stmt.run({ ...input, qualified_at: new Date().toISOString() });
+  const result = stmt.run({
+    ...input,
+    image_url: input.image_url ?? null,
+    qualified_at: new Date().toISOString(),
+  });
   return getArticle(result.lastInsertRowid as number)!;
 }
 
