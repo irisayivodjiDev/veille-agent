@@ -109,6 +109,25 @@ export function updateSourceStatus(id: number, status: SourceStatus, error_messa
   );
 }
 
+// Supprime une source et, si elle a déjà été qualifiée, l'article dérivé
+// et tout ce qui en dépend (tags, reposts, réactions) pour ne pas laisser
+// de lignes orphelines.
+export function deleteSource(id: number) {
+  const tx = db.transaction(() => {
+    const article = db.prepare('SELECT id FROM articles WHERE source_id = ?').get(id) as
+      | { id: number }
+      | undefined;
+    if (article) {
+      db.prepare('DELETE FROM article_tags WHERE article_id = ?').run(article.id);
+      db.prepare('DELETE FROM reposts WHERE article_id = ?').run(article.id);
+      db.prepare('DELETE FROM reactions WHERE article_id = ?').run(article.id);
+      db.prepare('DELETE FROM articles WHERE id = ?').run(article.id);
+    }
+    db.prepare('DELETE FROM sources WHERE id = ?').run(id);
+  });
+  tx();
+}
+
 // ---- Folders ----
 
 export function listFolders(): FolderRow[] {

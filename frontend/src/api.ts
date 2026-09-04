@@ -79,6 +79,7 @@ export const api = {
   captureUrl: (url: string) => request<SourceRow>('/sources', { method: 'POST', body: JSON.stringify({ url }) }),
   captureText: (text: string) => request<SourceRow>('/sources', { method: 'POST', body: JSON.stringify({ text }) }),
   processSource: (id: number) => request<{ articleId: number }>(`/sources/${id}/process`, { method: 'POST' }),
+  deleteSource: (id: number) => request<{ ok: boolean }>(`/sources/${id}`, { method: 'DELETE' }),
 
   listFolders: () => request<FolderRow[]>('/folders'),
   listTags: () => request<TagRow[]>('/tags'),

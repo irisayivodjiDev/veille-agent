@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { runQualifier } from '../../Agents/Qualifier/Qualifier.mts';
-import { createSource, listSources } from '../../db/repository.mts';
+import { createSource, deleteSource, getSource, listSources } from '../../db/repository.mts';
 
 export const sourcesRouter = Router();
 
@@ -20,6 +20,15 @@ sourcesRouter.post('/', (req, res) => {
     : createSource({ channel: 'web', raw_type: 'text', raw_text: text });
 
   res.status(201).json(source);
+});
+
+sourcesRouter.delete('/:id', (req, res) => {
+  const sourceId = Number(req.params.id);
+  if (Number.isNaN(sourceId) || !getSource(sourceId)) {
+    return res.status(404).json({ error: 'Source introuvable' });
+  }
+  deleteSource(sourceId);
+  res.json({ ok: true });
 });
 
 sourcesRouter.post('/:id/process', async (req, res) => {

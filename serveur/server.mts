@@ -500,6 +500,7 @@ app.use('*', (req: Request, res: Response) => {
       'GET /conversations/:threadId',
       'GET /api/sources',
       'POST /api/sources',
+      'DELETE /api/sources/:id',
       'POST /api/sources/:id/process',
       'GET /api/articles',
       'GET /api/articles/:id',
@@ -557,6 +558,7 @@ async function startServer() {
       console.log('📰 App de veille:');
       console.log(`  GET  /api/sources                - Sources capturées`);
       console.log(`  POST /api/sources                - Capturer (url ou text)`);
+      console.log(`  DELETE /api/sources/:id          - Supprimer une source`);
       console.log(`  POST /api/sources/:id/process     - Qualifier + ranger`);
       console.log(`  GET  /api/articles                - Articles (folderId=, tag=)`);
       console.log(`  PATCH /api/articles/:id/tags       - Correction manuelle des tags`);

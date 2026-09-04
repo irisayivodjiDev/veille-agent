@@ -21,7 +21,7 @@ export default function App() {
       <BackgroundDecor />
 
       <header className="border-b border-pink-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900">
             <span aria-hidden>🌸</span> App de veille
           </h1>
@@ -48,7 +48,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-6xl px-6 py-8">
         {view === 'sources' && (
           <SourcesPage
             onQualified={(articleId) => {
