@@ -1,6 +1,7 @@
+import { FolderOpen, Tag as TagIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api, type ArticleRow, type FolderRow } from '../api';
-import { badge, card, errorText, inputBase, mutedText, sectionTitle } from '../ui';
+import { badge, card, errorText, Input, mutedText, pageTitle, sectionTitle } from '../ui';
 
 export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
   const [folders, setFolders] = useState<FolderRow[]>([]);
@@ -27,21 +28,23 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
   const categories = Array.from(new Set(folders.map((f) => f.category)));
 
   const folderBtn = (active: boolean) =>
-    `block w-full rounded-lg px-3 py-1.5 text-left text-sm transition-colors ${
+    `block w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${
       active ? 'bg-pink-500 text-white shadow-sm shadow-pink-200' : 'text-slate-600 hover:bg-pink-50 hover:text-pink-700'
     }`;
 
   return (
     <div className="flex flex-col gap-6 md:flex-row">
-      <aside className={card + ' h-fit w-full shrink-0 md:w-56'}>
-        <h3 className={sectionTitle}>Dossiers</h3>
+      <aside className={`${card} h-fit w-full shrink-0 md:w-56`}>
+        <h3 className={`${sectionTitle} flex items-center gap-1.5`}>
+          <FolderOpen size={14} aria-hidden /> Dossiers
+        </h3>
         <div className="flex flex-col gap-1">
           <button className={folderBtn(folderId === null)} onClick={() => setFolderId(null)}>
             Tous
           </button>
           {categories.map((cat) => (
             <div key={cat} className="mt-2">
-              <div className="px-3 text-xs font-semibold uppercase tracking-wide text-slate-400">{cat}</div>
+              <div className="px-3 text-sm font-bold uppercase tracking-wide text-slate-400">{cat}</div>
               <div className="mt-1 flex flex-col gap-1">
                 {folders
                   .filter((f) => f.category === cat)
@@ -55,18 +58,14 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
           ))}
         </div>
 
-        <h3 className={sectionTitle + ' mt-5'}>Filtrer par tag</h3>
-        <input
-          type="text"
-          className={inputBase}
-          placeholder="ex: ia"
-          value={tag}
-          onChange={(e) => setTag(e.target.value)}
-        />
+        <h3 className={`${sectionTitle} mt-5 flex items-center gap-1.5`}>
+          <TagIcon size={14} aria-hidden /> Filtrer par tag
+        </h3>
+        <Input type="text" placeholder="ex: ia" value={tag} onChange={(e) => setTag(e.target.value)} />
       </aside>
 
       <div className="min-w-0 flex-1">
-        <h2 className="mb-4 text-xl font-semibold text-slate-800">Ranger</h2>
+        <h2 className={`${pageTitle} mb-4`}>Ranger</h2>
         {loading && <p className={mutedText}>Chargement...</p>}
         {loadError && <p className={errorText}>Erreur lors du chargement des articles : {loadError}</p>}
         {!loading && !loadError && articles.length === 0 && (
@@ -77,17 +76,20 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
           {articles.map((a) => (
             <div
               key={a.id}
-              className={card + ' cursor-pointer transition-shadow hover:shadow-md hover:shadow-pink-100'}
+              className={`${card} cursor-pointer transition-shadow hover:shadow-md hover:shadow-pink-200/70`}
               onClick={() => onSelect(a.id)}
             >
               <div className="flex items-start justify-between gap-2">
-                <strong className="text-slate-800">{a.title}</strong>
+                <strong className="font-semibold text-slate-900">{a.title}</strong>
                 {a.folder && <span className={badge}>{a.folder.name}</span>}
               </div>
-              <p className={mutedText + ' mt-1 line-clamp-3'}>{a.summary}</p>
+              <p className={`${mutedText} mt-1 line-clamp-3`}>{a.summary}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {a.tags.map((t) => (
-                  <span key={t.id} className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-600">
+                  <span
+                    key={t.id}
+                    className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-sm font-medium text-slate-700"
+                  >
                     {t.name}
                   </span>
                 ))}

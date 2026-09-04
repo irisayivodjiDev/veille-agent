@@ -1,6 +1,7 @@
+import { RotateCcw, Send, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api, type SourceRow } from '../api';
-import { badge, btnPrimary, btnSecondary, card, errorText, inputBase, mutedText, sectionTitle } from '../ui';
+import { badgeTones, Button, card, errorText, Input, mutedText, pageTitle, sectionTitle } from '../ui';
 
 const STATUS_LABEL: Record<string, string> = {
   pending: 'En attente',
@@ -9,11 +10,11 @@ const STATUS_LABEL: Record<string, string> = {
   error: 'Erreur',
 };
 
-const STATUS_STYLE: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  processed: 'bg-emerald-100 text-emerald-700',
-  rejected: 'bg-slate-100 text-slate-600',
-  error: 'bg-rose-100 text-rose-700',
+const STATUS_TONE: Record<string, keyof typeof badgeTones> = {
+  pending: 'amber',
+  processed: 'emerald',
+  rejected: 'slate',
+  error: 'rose',
 };
 
 export function SourcesPage({ onQualified }: { onQualified: (articleId: number) => void }) {
@@ -78,21 +79,21 @@ export function SourcesPage({ onQualified }: { onQualified: (articleId: number) 
   return (
     <div className="flex flex-col gap-6">
       <div className={card}>
-        <h2 className="mb-1 text-xl font-semibold text-slate-800">Capter</h2>
-        <p className={mutedText + ' mb-4'}>Colle un lien ou une idée en texte libre pour la capturer.</p>
-        <form className="flex gap-2" onSubmit={handleCapture}>
-          <input
+        <h2 className={pageTitle}>Capter</h2>
+        <p className={`${mutedText} mb-4 mt-1`}>Colle un lien ou une idée en texte libre pour la capturer.</p>
+        <form className="flex flex-wrap gap-2" onSubmit={handleCapture}>
+          <Input
             type="text"
-            className={inputBase}
+            className="min-w-[16rem] flex-1"
             placeholder="https://... ou une idée en texte libre"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button type="submit" className={btnPrimary}>
+          <Button type="submit" variant="primary" icon={Send}>
             Capturer
-          </button>
+          </Button>
         </form>
-        {actionError && <p className={errorText + ' mt-2'}>{actionError}</p>}
+        {actionError && <p className={`${errorText} mt-2`}>{actionError}</p>}
       </div>
 
       <div className={card}>
@@ -104,57 +105,59 @@ export function SourcesPage({ onQualified }: { onQualified: (articleId: number) 
         )}
 
         {sources.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+          <div className="overflow-hidden overflow-x-auto rounded-xl border border-pink-100">
+            <table className="w-full min-w-2xl border-collapse text-sm">
               <thead>
-                <tr className="border-b border-pink-100 text-left text-xs uppercase tracking-wide text-slate-400">
-                  <th className="py-2 pr-3">#</th>
-                  <th className="py-2 pr-3">Canal</th>
-                  <th className="py-2 pr-3">Type</th>
-                  <th className="py-2 pr-3">Contenu</th>
-                  <th className="py-2 pr-3">Statut</th>
-                  <th className="py-2 pr-3">Capturée le</th>
-                  <th className="py-2 pr-3"></th>
+                <tr className="bg-pink-50 text-left text-sm font-bold uppercase tracking-wide text-pink-700">
+                  <th className="px-3 py-2.5">#</th>
+                  <th className="px-3 py-2.5">Canal</th>
+                  <th className="px-3 py-2.5">Type</th>
+                  <th className="px-3 py-2.5">Contenu</th>
+                  <th className="px-3 py-2.5">Statut</th>
+                  <th className="px-3 py-2.5">Capturée le</th>
+                  <th className="px-3 py-2.5"></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-pink-50">
                 {sources.map((s) => (
-                  <tr key={s.id} className="border-b border-pink-50 last:border-0">
-                    <td className="py-2 pr-3 text-slate-500">{s.id}</td>
-                    <td className="py-2 pr-3 text-slate-700">{s.channel}</td>
-                    <td className="py-2 pr-3 text-slate-700">{s.raw_type}</td>
-                    <td className="max-w-xs truncate py-2 pr-3 text-slate-700">
+                  <tr key={s.id} className="transition-colors hover:bg-pink-50/60">
+                    <td className="px-3 py-2.5 text-slate-500">{s.id}</td>
+                    <td className="px-3 py-2.5 text-slate-800">{s.channel}</td>
+                    <td className="px-3 py-2.5 text-slate-800">{s.raw_type}</td>
+                    <td className="max-w-xs truncate px-3 py-2.5 text-slate-800">
                       {s.raw_url || s.transcript || s.raw_text}
                     </td>
-                    <td className="py-2 pr-3">
-                      <span className={`${badge} ${STATUS_STYLE[s.status] ?? 'bg-slate-100 text-slate-600'}`}>
+                    <td className="px-3 py-2.5">
+                      <span className={badgeTones[STATUS_TONE[s.status] ?? 'slate']}>
                         {STATUS_LABEL[s.status] || s.status}
                       </span>
                       {s.status === 'error' && s.error_message && (
-                        <span className={mutedText + ' ml-2'}>{s.error_message}</span>
+                        <span className={`${mutedText} ml-2`}>{s.error_message}</span>
                       )}
                     </td>
-                    <td className="py-2 pr-3 text-slate-500">
+                    <td className="px-3 py-2.5 text-slate-500">
                       {new Date(s.captured_at).toLocaleString('fr-FR')}
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="px-3 py-2.5">
                       {s.status === 'pending' && (
-                        <button
-                          className={btnSecondary}
+                        <Button
+                          variant="secondary"
+                          icon={Sparkles}
                           disabled={processingId === s.id}
                           onClick={() => handleProcess(s.id)}
                         >
                           {processingId === s.id ? 'Qualification...' : 'Qualifier'}
-                        </button>
+                        </Button>
                       )}
                       {s.status === 'error' && (
-                        <button
-                          className={btnSecondary}
+                        <Button
+                          variant="secondary"
+                          icon={RotateCcw}
                           disabled={processingId === s.id}
                           onClick={() => handleProcess(s.id)}
                         >
                           Réessayer
-                        </button>
+                        </Button>
                       )}
                     </td>
                   </tr>
