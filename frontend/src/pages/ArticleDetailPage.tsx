@@ -147,7 +147,7 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
         <img
           src={article.image_url}
           alt=""
-          className="h-48 w-full rounded-2xl object-cover shadow-sm shadow-pink-100"
+          className="h-48 w-full rounded-2xl object-cover shadow-sm shadow-pink-100 dark:shadow-none"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
           }}
@@ -158,24 +158,24 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
         <h3 className={sectionTitle}>Qualification</h3>
         <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
           <div>
-            <dt className="font-semibold text-slate-500">Résumé</dt>
-            <dd className="mt-0.5 text-slate-800">{article.summary}</dd>
+            <dt className="font-semibold text-slate-500 dark:text-slate-400">Résumé</dt>
+            <dd className="mt-0.5 text-slate-800 dark:text-slate-200">{article.summary}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-500">Nature</dt>
-            <dd className="mt-0.5 text-slate-800">{article.nature}</dd>
+            <dt className="font-semibold text-slate-500 dark:text-slate-400">Nature</dt>
+            <dd className="mt-0.5 text-slate-800 dark:text-slate-200">{article.nature}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-500">Légitimité</dt>
-            <dd className="mt-0.5 text-slate-800">{article.legitimacy_note}</dd>
+            <dt className="font-semibold text-slate-500 dark:text-slate-400">Légitimité</dt>
+            <dd className="mt-0.5 text-slate-800 dark:text-slate-200">{article.legitimacy_note}</dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-500">Pourquoi intéressant</dt>
-            <dd className="mt-0.5 text-slate-800">{article.why_interesting}</dd>
+            <dt className="font-semibold text-slate-500 dark:text-slate-400">Pourquoi intéressant</dt>
+            <dd className="mt-0.5 text-slate-800 dark:text-slate-200">{article.why_interesting}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="font-semibold text-slate-500">En quoi ça augmente</dt>
-            <dd className="mt-0.5 text-slate-800">{article.augmentation_note}</dd>
+            <dt className="font-semibold text-slate-500 dark:text-slate-400">En quoi ça augmente</dt>
+            <dd className="mt-0.5 text-slate-800 dark:text-slate-200">{article.augmentation_note}</dd>
           </div>
         </dl>
       </div>
@@ -187,7 +187,9 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
             <span
               key={t.id}
               className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-sm font-semibold ${
-                t.source === 'manual' ? 'bg-violet-100 text-violet-800' : 'bg-slate-100 text-slate-700'
+                t.source === 'manual'
+                  ? 'bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-300'
+                  : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
               }`}
             >
               {t.name}
@@ -247,18 +249,18 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
             </div>
             {seoError && <p className={`${errorText} mt-2`}>{seoError}</p>}
             {draft.seo_title && (
-              <div className="mt-3 rounded-xl bg-pink-50 p-3 text-sm">
+              <div className="mt-3 rounded-xl bg-pink-50 p-3 text-sm dark:bg-slate-700/50">
                 <p>
-                  <strong className="font-semibold text-slate-800">Titre SEO</strong>{' '}
-                  <span className="text-slate-700">{draft.seo_title}</span>
+                  <strong className="font-semibold text-slate-800 dark:text-slate-100">Titre SEO</strong>{' '}
+                  <span className="text-slate-700 dark:text-slate-300">{draft.seo_title}</span>
                 </p>
                 <p>
-                  <strong className="font-semibold text-slate-800">Meta-description</strong>{' '}
-                  <span className="text-slate-700">{draft.seo_description}</span>
+                  <strong className="font-semibold text-slate-800 dark:text-slate-100">Meta-description</strong>{' '}
+                  <span className="text-slate-700 dark:text-slate-300">{draft.seo_description}</span>
                 </p>
                 <p>
-                  <strong className="font-semibold text-slate-800">Mots-clés</strong>{' '}
-                  <span className="text-slate-700">{draft.seo_keywords}</span>
+                  <strong className="font-semibold text-slate-800 dark:text-slate-100">Mots-clés</strong>{' '}
+                  <span className="text-slate-700 dark:text-slate-300">{draft.seo_keywords}</span>
                 </p>
               </div>
             )}
@@ -268,9 +270,9 @@ export function ArticleDetailPage({ articleId, onBack }: { articleId: number; on
 
       <div className={card}>
         <h3 className={sectionTitle}>Pertinence (bonus)</h3>
-        <p className="text-sm text-slate-800">
+        <p className="text-sm text-slate-800 dark:text-slate-200">
           <strong className="font-semibold">Score de pertinence</strong> : {Math.round(article.relevance_score * 100)}%
-          {article.mood_summary && <span className="text-slate-600"> — {article.mood_summary}</span>}
+          {article.mood_summary && <span className="text-slate-600 dark:text-slate-400"> — {article.mood_summary}</span>}
         </p>
 
         {reactionsList.length > 0 && (

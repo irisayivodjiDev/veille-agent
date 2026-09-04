@@ -122,10 +122,10 @@ export function SourcesPage({ onQualified }: { onQualified: (articleId: number) 
         )}
 
         {sources.length > 0 && (
-          <div className="overflow-hidden overflow-x-auto rounded-xl border border-pink-100">
+          <div className="overflow-hidden overflow-x-auto rounded-xl border border-pink-100 dark:border-slate-700">
             <table className="w-full min-w-2xl border-collapse text-sm">
               <thead>
-                <tr className="bg-pink-50 text-left text-sm font-bold uppercase tracking-wide text-pink-700">
+                <tr className="bg-pink-50 text-left text-sm font-bold uppercase tracking-wide text-pink-700 dark:bg-slate-900 dark:text-pink-300">
                   <th className="px-3 py-3">#</th>
                   <th className="px-3 py-3">Canal</th>
                   <th className="px-3 py-3">Type</th>
@@ -135,13 +135,13 @@ export function SourcesPage({ onQualified }: { onQualified: (articleId: number) 
                   <th className="px-3 py-3"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-pink-50">
+              <tbody className="divide-y divide-pink-50 dark:divide-slate-700">
                 {sources.map((s) => (
-                  <tr key={s.id} className="transition-colors hover:bg-pink-50/60">
-                    <td className="px-3 py-3 text-slate-500">{s.id}</td>
-                    <td className="px-3 py-3 text-slate-800">{s.channel}</td>
-                    <td className="px-3 py-3 text-slate-800">{s.raw_type}</td>
-                    <td className="max-w-xs truncate px-3 py-3 text-slate-800">
+                  <tr key={s.id} className="transition-colors hover:bg-pink-50/60 dark:hover:bg-slate-700/50">
+                    <td className="px-3 py-3 text-slate-500 dark:text-slate-400">{s.id}</td>
+                    <td className="px-3 py-3 text-slate-800 dark:text-slate-200">{s.channel}</td>
+                    <td className="px-3 py-3 text-slate-800 dark:text-slate-200">{s.raw_type}</td>
+                    <td className="max-w-xs truncate px-3 py-3 text-slate-800 dark:text-slate-200">
                       {s.raw_url || s.transcript || s.raw_text}
                     </td>
                     <td className="px-3 py-3">
@@ -152,7 +152,7 @@ export function SourcesPage({ onQualified }: { onQualified: (articleId: number) 
                         <span className={`${mutedText} ml-2`}>{s.error_message}</span>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-slate-500">
+                    <td className="px-3 py-3 text-slate-500 dark:text-slate-400">
                       {new Date(s.captured_at).toLocaleString('fr-FR')}
                     </td>
                     <td className="px-3 py-3">

@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
+/* Mode sombre pilote par une classe .dark sur <html> (pas seulement les
+   preferences systeme), pour permettre un bouton de bascule manuel. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root.dark {
+  color-scheme: dark;
 }
 
 body {
