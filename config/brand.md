@@ -1,8 +1,8 @@
-# Identité de marque — Orastay
+# Identité de marque — Personal branding (Havila Iris Ayivodji)
 
-- **Nom de la marque** : Orastay
-- **Secteur** : Voyage & hospitalité (séjours, expériences, hôtellerie haut de gamme)
-- **Audience visée** : voyageurs exigeants et curieux, à la recherche d'expériences et de destinations qui sortent de l'ordinaire
-- **Ton de voix** : chic et inspirant — élégant, évocateur, qui donne envie de partir, sans jamais tomber dans le pompeux
-- **Objectif des posts** : montrer qu'Orastay a un vrai regard de curateur sur le voyage et l'hospitalité, pas juste relayer une actualité — donner envie de suivre la marque pour sa sensibilité
-- **Ce qu'il faut éviter** : jargon technique, ton trop commercial/publicitaire, emojis à outrance, name-dropping artificiel
+- **Nom** : Havila Iris Ayivodji
+- **Secteur** : Tech, IA, développement web — future cheffe de projet digital
+- **Audience visée** : développeurs, recruteurs et pairs du secteur tech, personnes qui suivent l'actualité IA/dev
+- **Ton de voix** : authentique et personnel — je partage aussi mon ressenti et mon parcours, pas juste un résumé neutre ; proche, humain, jamais impersonnel
+- **Objectif des posts** : construire ma visibilité professionnelle en tant que veilleuse-commentatrice sur la tech et l'IA — montrer ma manière de digérer l'information et d'en tirer un point de vue, pas juste relayer une actualité
+- **Ce qu'il faut éviter** : jargon corporate impersonnel, ton trop promotionnel, formulations génériques qui pourraient être écrites par n'importe qui
