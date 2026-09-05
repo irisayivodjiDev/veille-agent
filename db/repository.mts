@@ -98,7 +98,7 @@ export function getSource(id: number): SourceRow | undefined {
 }
 
 export function listSources(): SourceRow[] {
-  return db.prepare('SELECT * FROM sources ORDER BY captured_at DESC').all() as SourceRow[];
+  return db.prepare('SELECT * FROM sources ORDER BY captured_at DESC, id DESC').all() as SourceRow[];
 }
 
 export function updateSourceStatus(id: number, status: SourceStatus, error_message?: string) {
@@ -192,16 +192,16 @@ export function listArticles(filters: { folderId?: number; tag?: string } = {}):
          JOIN article_tags at ON at.article_id = a.id
          JOIN tags t ON t.id = at.tag_id
          WHERE t.name = ?
-         ORDER BY a.qualified_at DESC`
+         ORDER BY a.qualified_at DESC, a.id DESC`
       )
       .all(filters.tag.trim().toLowerCase()) as ArticleRow[];
   }
   if (filters.folderId) {
     return db
-      .prepare('SELECT * FROM articles WHERE folder_id = ? ORDER BY qualified_at DESC')
+      .prepare('SELECT * FROM articles WHERE folder_id = ? ORDER BY qualified_at DESC, id DESC')
       .all(filters.folderId) as ArticleRow[];
   }
-  return db.prepare('SELECT * FROM articles ORDER BY qualified_at DESC').all() as ArticleRow[];
+  return db.prepare('SELECT * FROM articles ORDER BY qualified_at DESC, id DESC').all() as ArticleRow[];
 }
 
 export function setArticleTags(articleId: number, tagNames: string[], origin: TagOrigin) {
@@ -245,7 +245,7 @@ export function createRepost(input: { article_id: number; platform: string; cont
 
 export function listRepostsForArticle(articleId: number): RepostRow[] {
   return db
-    .prepare('SELECT * FROM reposts WHERE article_id = ? ORDER BY created_at DESC')
+    .prepare('SELECT * FROM reposts WHERE article_id = ? ORDER BY created_at DESC, id DESC')
     .all(articleId) as RepostRow[];
 }
 
@@ -296,7 +296,7 @@ export function createReactions(
 
 export function listReactionsForArticle(articleId: number): ReactionRow[] {
   return db
-    .prepare('SELECT * FROM reactions WHERE article_id = ? ORDER BY collected_at DESC')
+    .prepare('SELECT * FROM reactions WHERE article_id = ? ORDER BY collected_at DESC, id DESC')
     .all(articleId) as ReactionRow[];
 }
 

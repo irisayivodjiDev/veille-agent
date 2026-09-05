@@ -8,9 +8,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..');
 
 const dbPath = process.env.APP_DB_PATH || 'state_db/veille.db';
-const fullDbPath = join(projectRoot, dbPath);
+// ':memory:' est un nom spécial pour better-sqlite3 (base éphémère en RAM,
+// utilisée par les tests) : il ne faut pas le résoudre en chemin de fichier.
+const fullDbPath = dbPath === ':memory:' ? dbPath : join(projectRoot, dbPath);
 
-fs.mkdirSync(dirname(fullDbPath), { recursive: true });
+if (fullDbPath !== ':memory:') {
+  fs.mkdirSync(dirname(fullDbPath), { recursive: true });
+}
 
 export const db = new Database(fullDbPath);
 db.pragma('journal_mode = WAL');

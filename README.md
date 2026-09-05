@@ -1,8 +1,8 @@
-# 🤖 Agent CLI & Server
+# Agent CLI & Server
 
 Un CLI et serveur JavaScript/TypeScript pour tester et interagir avec des agents IA.
 
-## 📰 App de veille (projet)
+## App de veille (projet)
 
 En plus du squelette d'origine, ce dépôt contient une web app de veille en 4 temps :
 **capter → qualifier → ranger → republier avec valeur ajoutée**, avec le modèle de données
@@ -44,15 +44,6 @@ LM Studio doit tourner en local (`http://localhost:1234`) avec le modèle défin
   Le texte est éditable et peut être marqué "publié" (`POST /api/articles/:id/repost`,
   `PATCH /api/reposts/:id`).
 
-### Limitations connues / bonus restants
-
-- Le modèle par défaut (`dolphin3.0-llama3.1-8b`) plantait au chargement sur cette machine
-  (erreur mémoire GPU/Vulkan) ; les tests ont été faits avec `llama-3.2-1b-instruct` (plus léger
-  mais moins précis sur les tags). Repasser sur un modèle plus costaud dans `.env`
-  (`LMSTUDIO_MODEL`) une fois le souci GPU réglé (cf. réglages Runtime/GPU Offload de LM Studio).
-- Bonus non commencés : agent de pertinence (réactions/commentaires), capture dictaphone terrain
-  (transcription locale), skills SEO.
-
 ### Variables d'environnement (`.env`, voir `.env.example`)
 
 | Variable | Rôle |
@@ -61,7 +52,18 @@ LM Studio doit tourner en local (`http://localhost:1234`) avec le modèle défin
 | `APP_DB_PATH` | Fichier SQLite de l'app (séparé du checkpointer LangGraph) |
 | `TELEGRAM_BOT_TOKEN` | Token du bot Telegram (capture) — optionnel |
 
-## 📦 Installation
+### Tests
+
+```bash
+npm test
+```
+
+Tests unitaires (Vitest) sur `db/repository.mts` : Source/Article/Tag/Repost/
+Reaction, cascade de suppression, filtres par dossier/tag. Tournent sur une
+base SQLite en RAM (`APP_DB_PATH=:memory:`, voir `vitest.setup.mts`), jamais
+sur `state_db/veille.db`.
+
+## Installation
 
 ```bash
 # Installer les dépendances
@@ -71,7 +73,7 @@ npm install
 cp .env.example .env
 ```
 
-## 🚀 Démarrage rapide
+## Démarrage rapide
 
 ### 1. Démarrer le serveur
 
@@ -104,7 +106,7 @@ npm run cli chat --invoke
 npm run cli chat --debug
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Variables d'environnement
 
@@ -141,7 +143,7 @@ Modifiez le fichier `agents_config.json` pour configurer vos agents :
 }
 ```
 
-## 📡 Endpoints API
+##  Endpoints API
 
 ### Vérification de santé
 ```http
@@ -196,7 +198,7 @@ GET /conversations/:threadId
 Authorization: Bearer your-token
 ```
 
-## 💬 Utilisation du CLI
+## Utilisation du CLI
 
 ### Commandes spéciales pendant le chat
 
@@ -223,7 +225,7 @@ npm run cli chat [options]
   --no-context          Désactiver le contexte
 ```
 
-## 🔄 Streaming et événements SSE
+## Streaming et événements SSE
 
 Le serveur supporte les Server-Sent Events avec les types d'événements suivants :
 
@@ -235,7 +237,7 @@ Le serveur supporte les Server-Sent Events avec les types d'événements suivant
 - `tool_execution_error` - Erreur d'outil
 - `error` - Erreur générale
 
-## 🛠️ Développement
+## Développement
 
 ### Structure du projet
 
@@ -265,14 +267,14 @@ Pour remplacer le `MockAgent` par de vrais agents :
 2. Intégrez avec LangChain, OpenAI, ou votre framework préféré
 3. Adaptez les méthodes `generateResponse` et `invokeResponse`
 
-## 🔐 Sécurité
+## Sécurité
 
 - L'authentification par token Bearer est optionnelle (configurable)
 - Les tokens sont stockés en mémoire côté serveur
 - Les conversations sont en mémoire (remplacer par une DB en production)
 - CORS configuré pour accepter toutes les origines (à restreindre en production)
 
-## 📝 Exemples d'utilisation
+## Exemples d'utilisation
 
 ### Test rapide
 
@@ -304,7 +306,7 @@ npm run cli chat --bearer-token mon-super-token
 npm run cli chat --debug
 ```
 
-## 🚨 Limitations actuelles
+## Limitations actuelles
 
 - Agents simulés (MockAgent)
 - Stockage en mémoire uniquement
@@ -312,7 +314,7 @@ npm run cli chat --debug
 - Authentification basique
 - Pas de rate limiting
 
-## 🎯 Prochaines étapes
+## Prochaines étapes
 
 - [ ] Intégration avec de vrais agents LangChain
 - [ ] Base de données pour la persistance
@@ -322,10 +324,9 @@ npm run cli chat --debug
 - [ ] Docker
 - [ ] Tests automatisés
 
-## 📄 Licence
+## Licence
 
 MIT
 
 ---
 
-🚀 **Prêt à discuter avec vos agents IA !** 

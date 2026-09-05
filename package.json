@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "cli": "tsx CLI/cli.mts",
     "server": "tsx serveur/server.mts",
     "server-simple": "tsx serveur/server-simple.mts",
@@ -40,9 +40,12 @@
     "@types/express": "^4.17.21",
     "@types/inquirer": "^9.0.7",
     "@types/multer": "^1.4.12",
-    "@types/node": "^20.10.0",
+    "@types/node": "^24.0.0",
     "@types/node-telegram-bot-api": "^0.64.7",
+    "@types/supertest": "^7.2.1",
     "@types/uuid": "^9.0.7",
-    "tsx": "^4.6.0"
+    "supertest": "^7.2.2",
+    "tsx": "^4.6.0",
+    "vitest": "^5.0.0"
   }
 }
