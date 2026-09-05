@@ -110,4 +110,25 @@ export const api = {
     }),
 
   optimizeSeo: (repostId: number) => request<RepostRow>(`/reposts/${repostId}/seo`, { method: 'POST' }),
+
+  // Agent générique fourni par le squelette du cours (pas sous /api, routes
+  // d'origine : POST /:agentId/invoke).
+  chat: async (message: string, threadId: string): Promise<ChatResponse> => {
+    const res = await fetch('/Agent/invoke', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, thread_id: threadId }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Erreur ${res.status}`);
+    }
+    return res.json();
+  },
 };
+
+export interface ChatResponse {
+  content: string;
+  thread_id: string;
+  run_id: string;
+}

@@ -8,6 +8,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://localhost:8080',
+      // routes de l'agent LangGraph fourni par le squelette (chat sur la page d'accueil)
+      '/Agent': 'http://localhost:8080',
     },
   },
 })

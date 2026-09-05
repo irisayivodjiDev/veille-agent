@@ -1,6 +1,7 @@
 import { RotateCcw, Send, Sparkles, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api, type SourceRow } from '../api';
+import { ChatWidget } from '../ChatWidget';
 import { badgeTones, Button, card, errorText, Input, mutedText, pageTitle, sectionTitle } from '../ui';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -194,6 +195,8 @@ export function SourcesPage({ onQualified }: { onQualified: (articleId: number) 
           </div>
         )}
       </div>
+
+      <ChatWidget />
     </div>
   );
 }

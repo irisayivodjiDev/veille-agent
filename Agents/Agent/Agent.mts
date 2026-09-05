@@ -2,23 +2,17 @@ import 'dotenv/config';
 
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { ChatOpenAI } from "@langchain/openai";
 import { loadAgentPrompt } from "./generate_prompt.mts";
 import { weather } from "./tools/weather.mts";
 import { add } from "./tools/add.mts";
+import { getChatModel } from "../llm.mts";
 
 const agentPrompt = loadAgentPrompt('Agent');
 
-const agentModel = new ChatOpenAI({ 
-  temperature: 0.5,
-  model: "dolphin3.0-llama3.1-8b", // ou le nom de votre modèle
-  configuration: {
-    baseURL: "http://localhost:1234/v1",
-    apiKey: "not-needed", // LMStudio ne nécessite pas de clé API réelle
-  }
-});
-
-//const agentModel = new ChatOpenAI({ temperature: 0.5, model: "gpt-4o-mini" });
+// Utilise la factory LM Studio partagée (Agents/llm.mts) au lieu d'un modèle
+// codé en dur ici : le modèle vient de LMSTUDIO_MODEL dans .env, comme pour
+// les autres agents de l'app de veille.
+const agentModel = getChatModel(0.3);
 
 const agentCheckpointer = new MemorySaver();
 export const agent = createReactAgent({

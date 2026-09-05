@@ -124,6 +124,13 @@ function addMessageToConversation(threadId: string, message: ChatMessage) {
   conversation.updated_at = new Date().toISOString();
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(message)), ms)),
+  ]);
+}
+
 // Create Express app
 const app = express();
 
@@ -212,14 +219,25 @@ app.post('/:agentId/invoke', authenticateToken, async (req: Request, res: Respon
     });
 
     // Configuration pour l'agent
+    // recursionLimit borne le nombre d'aller-retours outil <-> LLM : un petit
+    // modèle local peut se mettre à rappeler un outil en boucle (halluciné)
+    // pour une question qui n'en a pas besoin, ce qui bloquerait sinon la
+    // requête indéfiniment.
     const config: RunnableConfig = {
       configurable: { thread_id: threadId },
-      runId: runId
+      runId: runId,
+      recursionLimit: 4,
     };
 
-    // Invoquer l'agent avec le message
+    // Invoquer l'agent avec le message, avec un filet de sécurité temporel :
+    // si malgré la limite de récursion l'appel traîne, on échoue proprement
+    // plutôt que de laisser la requête HTTP pendre indéfiniment.
     const input = { messages: [new HumanMessage({ content: userInput.message })] };
-    const result = await agent.invoke(input, config);
+    const result = await withTimeout(
+      agent.invoke(input, config),
+      100000,
+      "L'agent met trop de temps à répondre (modèle local lent sur plusieurs aller-retours d'outil)"
+    );
 
     // Extraire la réponse
     const lastMessage = result.messages[result.messages.length - 1];
@@ -292,10 +310,11 @@ app.post('/:agentId/stream', authenticateToken, async (req: Request, res: Respon
     sendSSE('stream_start');
 
     try {
-      // Configuration pour l'agent
+      // Configuration pour l'agent (voir /invoke pour l'explication de recursionLimit)
       const config: RunnableConfig = {
         configurable: { thread_id: threadId },
-        runId: runId
+        runId: runId,
+        recursionLimit: 4,
       };
 
       const input = { messages: [new HumanMessage({ content: userInput.message })] };
