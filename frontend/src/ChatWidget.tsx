@@ -43,9 +43,6 @@ export function ChatWidget() {
       <h3 className={`${sectionTitle} flex items-center gap-1.5`}>
         <Bot size={14} aria-hidden /> Discuter avec l'agent (démo)
       </h3>
-      <p className={`${mutedText} mb-3`}>
-        Agent météo LangGraph fourni avec le squelette du cours — pas lié aux données de veille, juste une vitrine.
-      </p>
 
       <div className="mb-3 flex max-h-64 flex-col gap-2 overflow-y-auto">
         {messages.length === 0 && <p className={mutedText}>Pose-lui une question, par exemple sur la météo.</p>}
