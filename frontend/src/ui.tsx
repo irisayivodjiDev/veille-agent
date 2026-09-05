@@ -98,3 +98,29 @@ export const badgeTones = {
 };
 
 export const badge = badgeTones.pink;
+
+export function Pagination({
+  page,
+  pageCount,
+  onChange,
+}: {
+  page: number;
+  pageCount: number;
+  onChange: (page: number) => void;
+}) {
+  if (pageCount <= 1) return null;
+
+  return (
+    <div className="mt-4 flex items-center justify-center gap-3">
+      <Button variant="secondary" disabled={page <= 1} onClick={() => onChange(page - 1)}>
+        Précédent
+      </Button>
+      <span className={mutedText}>
+        Page {page} / {pageCount}
+      </span>
+      <Button variant="secondary" disabled={page >= pageCount} onClick={() => onChange(page + 1)}>
+        Suivant
+      </Button>
+    </div>
+  );
+}

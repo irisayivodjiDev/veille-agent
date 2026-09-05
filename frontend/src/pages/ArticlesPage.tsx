@@ -1,7 +1,9 @@
 import { FolderOpen, Tag as TagIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api, type ArticleRow, type FolderRow } from '../api';
-import { badge, card, errorText, Input, mutedText, pageTitle, sectionTitle } from '../ui';
+import { badge, card, errorText, Input, mutedText, pageTitle, Pagination, sectionTitle } from '../ui';
+
+const PAGE_SIZE = 6;
 
 export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
   const [folders, setFolders] = useState<FolderRow[]>([]);
@@ -10,6 +12,7 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
   const [tag, setTag] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     api.listFolders().then(setFolders).catch((err) => setLoadError((err as Error).message));
@@ -18,6 +21,7 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
   useEffect(() => {
     setLoading(true);
     setLoadError(null);
+    setPage(1);
     api
       .listArticles({ folderId: folderId ?? undefined, tag: tag || undefined })
       .then(setArticles)
@@ -26,6 +30,10 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
   }, [folderId, tag]);
 
   const categories = Array.from(new Set(folders.map((f) => f.category)));
+
+  const pageCount = Math.max(1, Math.ceil(articles.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageArticles = articles.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const folderBtn = (active: boolean) =>
     `block w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${
@@ -75,7 +83,7 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
         )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {articles.map((a) => (
+          {pageArticles.map((a) => (
             <div
               key={a.id}
               className={`${card} cursor-pointer overflow-hidden p-0! transition-shadow hover:shadow-md hover:shadow-pink-200/70 dark:hover:shadow-none dark:hover:border-pink-500/50`}
@@ -111,6 +119,7 @@ export function ArticlesPage({ onSelect }: { onSelect: (id: number) => void }) {
             </div>
           ))}
         </div>
+        <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
       </div>
     </div>
   );
