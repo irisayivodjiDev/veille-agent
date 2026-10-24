@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://veille-agent.onrender.com/api/:path*"
+    },
+    {
+      "source": "/Agent/:path*",
+      "destination": "https://veille-agent.onrender.com/Agent/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
