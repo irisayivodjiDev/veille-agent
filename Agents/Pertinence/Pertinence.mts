@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 import {
   createReactions,
   getArticle,
@@ -23,10 +24,6 @@ interface Classification {
   reason: string;
 }
 
-interface ClassificationBatch {
-  classifications: Classification[];
-}
-
 interface Synthesis {
   mood_summary: string;
   relevance_score: number;
@@ -45,30 +42,19 @@ async function classifyComments(comments: string[]): Promise<Classification[]> {
     comments: comments.map((c, i) => `${i + 1}. ${c}`).join('\n'),
   });
 
-  const schema = {
-    type: 'object',
-    properties: {
-      classifications: {
-        type: 'array',
-        minItems: comments.length,
-        maxItems: comments.length,
-        items: {
-          type: 'object',
-          properties: {
-            comment: { type: 'string' },
-            sentiment: { type: 'string', enum: ['positive', 'negative', 'neutral'] },
-            reason: { type: 'string' },
-          },
-          required: ['comment', 'sentiment', 'reason'],
-          additionalProperties: false,
-        },
-      },
-    },
-    required: ['classifications'],
-    additionalProperties: false,
-  };
+  const schema = z.object({
+    classifications: z
+      .array(
+        z.object({
+          comment: z.string(),
+          sentiment: z.enum(['positive', 'negative', 'neutral']),
+          reason: z.string(),
+        })
+      )
+      .length(comments.length),
+  });
 
-  const result = await callStructuredLlm<ClassificationBatch>(llm, prompt, 'classifications', schema);
+  const result = await callStructuredLlm(llm, prompt, 'classifications', schema);
   return result.classifications;
 }
 
@@ -82,17 +68,12 @@ async function synthesizeMood(
     reactions: reactions.map((r) => `- [${r.sentiment}] "${r.text}" — ${r.reason}`).join('\n'),
   });
 
-  const schema = {
-    type: 'object',
-    properties: {
-      mood_summary: { type: 'string' },
-      relevance_score: { type: 'number', minimum: 0, maximum: 1 },
-    },
-    required: ['mood_summary', 'relevance_score'],
-    additionalProperties: false,
-  };
+  const schema = z.object({
+    mood_summary: z.string(),
+    relevance_score: z.number().min(0).max(1),
+  });
 
-  return callStructuredLlm<Synthesis>(llm, prompt, 'synthesis', schema);
+  return callStructuredLlm(llm, prompt, 'synthesis', schema);
 }
 
 export async function runPertinence(articleId: number, rawText: string) {

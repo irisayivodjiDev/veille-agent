@@ -1,20 +1,17 @@
-import type { ChatOpenAI } from '@langchain/openai';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { z } from 'zod';
 
+// withStructuredOutput est fourni par LangChain pour chaque fournisseur
+// (OpenAI/LM Studio, Gemini, Anthropic...) : plus fiable qu'un prompt JSON
+// fait main, et surtout portable si on change de modèle plus tard.
 export async function callStructuredLlm<T>(
-  llm: ChatOpenAI,
+  llm: BaseChatModel,
   prompt: string,
   schemaName: string,
-  schema: Record<string, unknown>
+  schema: z.ZodType<T>
 ): Promise<T> {
-  const structuredLlm = llm.bind({
-    response_format: {
-      type: 'json_schema',
-      json_schema: { name: schemaName, strict: true, schema },
-    },
-  } as any);
-  const response = await structuredLlm.invoke(prompt);
-  const raw = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
-  return JSON.parse(raw) as T;
+  const structuredLlm = llm.withStructuredOutput<T>(schema, { name: schemaName });
+  return structuredLlm.invoke(prompt);
 }
 
 export function fillTemplate(template: string, vars: Record<string, string>): string {

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 import { getArticle, getArticleTags, getRepost, updateRepostSeo } from '../../db/repository.mts';
 import { getChatModel } from '../llm.mts';
 import { callStructuredLlm, fillTemplate } from '../parseJson.mts';
@@ -10,22 +11,11 @@ const promptTemplate = fs.readFileSync(join(__dirname, 'prompt.md'), 'utf-8');
 
 const llm = getChatModel(0.3);
 
-interface SeoResult {
-  seo_title: string;
-  seo_description: string;
-  seo_keywords: string[];
-}
-
-const SEO_SCHEMA = {
-  type: 'object',
-  properties: {
-    seo_title: { type: 'string' },
-    seo_description: { type: 'string' },
-    seo_keywords: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 8 },
-  },
-  required: ['seo_title', 'seo_description', 'seo_keywords'],
-  additionalProperties: false,
-};
+const SEO_SCHEMA = z.object({
+  seo_title: z.string(),
+  seo_description: z.string(),
+  seo_keywords: z.array(z.string()).min(3).max(8),
+});
 
 export async function runSeoOptimizer(repostId: number) {
   const repost = getRepost(repostId);
@@ -47,7 +37,7 @@ export async function runSeoOptimizer(repostId: number) {
     content: repost.content,
   });
 
-  const result = await callStructuredLlm<SeoResult>(llm, prompt, 'seo_optimization', SEO_SCHEMA);
+  const result = await callStructuredLlm(llm, prompt, 'seo_optimization', SEO_SCHEMA);
 
   // Le modele ne respecte pas toujours les longueurs demandees dans le prompt :
   // on tronque proprement plutot que de stocker un titre/description hors gabarit.

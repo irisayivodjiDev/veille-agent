@@ -2,6 +2,7 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import fs from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 import {
   type Category,
   createArticle,
@@ -72,28 +73,15 @@ async function extractNode(state: QualifierState): Promise<Partial<QualifierStat
 
 const ALLOWED_CATEGORIES: Category[] = ['metier', 'pro', 'perso', 'culture'];
 
-const QUALIFICATION_SCHEMA = {
-  type: 'object',
-  properties: {
-    title: { type: 'string' },
-    summary: { type: 'string' },
-    nature: { type: 'string', enum: ['video', 'article', 'post_reseau_social', 'autre'] },
-    legitimacy_note: { type: 'string' },
-    why_interesting: { type: 'string' },
-    augmentation_note: { type: 'string' },
-    category: { type: 'string', enum: ALLOWED_CATEGORIES },
-  },
-  required: [
-    'title',
-    'summary',
-    'nature',
-    'legitimacy_note',
-    'why_interesting',
-    'augmentation_note',
-    'category',
-  ],
-  additionalProperties: false,
-};
+const QUALIFICATION_SCHEMA = z.object({
+  title: z.string(),
+  summary: z.string(),
+  nature: z.enum(['video', 'article', 'post_reseau_social', 'autre']),
+  legitimacy_note: z.string(),
+  why_interesting: z.string(),
+  augmentation_note: z.string(),
+  category: z.enum(['metier', 'pro', 'perso', 'culture']),
+});
 
 async function qualifyNode(state: QualifierState): Promise<Partial<QualifierState>> {
   if (state.error) return {};
@@ -139,15 +127,11 @@ async function rankNode(state: QualifierState): Promise<Partial<QualifierState>>
     whyInteresting: state.qualification.why_interesting,
   });
 
-  const rankingSchema = {
-    type: 'object',
-    properties: {
-      folder: { type: 'string', enum: folders.map((f) => f.name) },
-      tags: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 6 },
-    },
-    required: ['folder', 'tags'],
-    additionalProperties: false,
-  };
+  const folderNames = folders.map((f) => f.name) as [string, ...string[]];
+  const rankingSchema = z.object({
+    folder: z.enum(folderNames),
+    tags: z.array(z.string()).min(1).max(6),
+  });
 
   try {
     const ranking = await callStructuredLlm<Ranking>(llm, prompt, 'ranking', rankingSchema);
