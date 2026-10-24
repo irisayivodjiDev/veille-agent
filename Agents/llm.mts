@@ -10,7 +10,7 @@ export function getChatModel(temperature = 0.5, maxTokens = 1024): BaseChatModel
   if (process.env.GOOGLE_API_KEY) {
     return new ChatGoogleGenerativeAI({
       apiKey: process.env.GOOGLE_API_KEY,
-      model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
       temperature,
       maxOutputTokens: maxTokens,
     }) as unknown as BaseChatModel;

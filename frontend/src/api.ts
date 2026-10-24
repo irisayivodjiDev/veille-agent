@@ -71,7 +71,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Erreur ${res.status}`);
+    throw new Error(body.message || body.error || `Erreur ${res.status}`);
   }
   return res.json();
 }
@@ -123,7 +123,7 @@ export const api = {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || `Erreur ${res.status}`);
+      throw new Error(body.message || body.error || `Erreur ${res.status}`);
     }
     return res.json();
   },

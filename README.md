@@ -44,8 +44,9 @@ le fichier `render.yaml` configure un service Render avec un disque persistant.
 1. Sur Render, crée un Blueprint depuis le dépôt et valide la configuration de
    `render.yaml`. Le plan Starter est nécessaire pour le disque persistant.
 2. Dans les variables du service Render, configure `GOOGLE_API_KEY` pour utiliser
-   le modèle Gemini en production. Ajoute `TELEGRAM_BOT_TOKEN` si le bot doit
-   fonctionner. LM Studio sur `localhost` ne sera pas accessible depuis Render.
+   Gemini et `GEMINI_MODEL=gemini-2.5-flash`. Ajoute `TELEGRAM_BOT_TOKEN` si le
+   bot doit fonctionner. LM Studio sur `localhost` ne sera pas accessible depuis
+   Render.
 3. Sur Vercel, importe le dépôt et choisis `frontend` comme **Root Directory**.
    Utilise `npm run build` et `dist` comme dossier de sortie.
 4. Dans les variables d'environnement Vercel, définis
