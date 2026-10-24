@@ -35,6 +35,32 @@ npm install
 npm run dev               # http://localhost:5173
 ```
 
+## Déploiement (Vercel + Render)
+
+Le frontend statique peut être déployé sur Vercel. L'API Express, le bot
+Telegram et SQLite ont besoin d'un processus persistant et d'un disque durable :
+le fichier `render.yaml` configure un service Render avec un disque persistant.
+
+1. Sur Render, crée un Blueprint depuis le dépôt et valide la configuration de
+   `render.yaml`. Le plan Starter est nécessaire pour le disque persistant.
+2. Dans les variables du service Render, configure `GOOGLE_API_KEY` pour utiliser
+   le modèle Gemini en production. Ajoute `TELEGRAM_BOT_TOKEN` si le bot doit
+   fonctionner. LM Studio sur `localhost` ne sera pas accessible depuis Render.
+3. Sur Vercel, importe le dépôt et choisis `frontend` comme **Root Directory**.
+   Utilise `npm run build` et `dist` comme dossier de sortie.
+4. Dans les variables d'environnement Vercel, définis
+   `VITE_API_BASE_URL` avec l'URL HTTPS du service Render (par exemple
+   `https://mon-api.onrender.com`), puis redéploie le frontend.
+
+Le frontend utilise une URL relative en développement et `VITE_API_BASE_URL`
+en production. L'API doit rester en ligne pour que le site fonctionne.
+
+**Sécurité :** l'API actuelle n'authentifie pas les routes de veille, qui seront
+donc accessibles publiquement une fois déployées. N'y mets pas de données
+sensibles et ajoute une authentification ainsi que des limites de requêtes avant
+un usage public en production. Le chat nécessite également `REQUIRE_AUTH=false`
+avec le frontend actuel ; ne déploie pas le chat publiquement sans le sécuriser.
+
 ## Fonctionnement
 
 1. **Capter** — formulaire web ou bot Telegram → crée une Source brute.

@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: veille-agent-api
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci --include=dev
+    startCommand: npm run server
+    healthCheckPath: /health
+    disk:
+      name: veille-agent-data
+      mountPath: /opt/render/project/src/state_db
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: APP_DB_PATH
+        value: state_db/veille.db
+      - key: REQUIRE_AUTH
+        value: "false"
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false

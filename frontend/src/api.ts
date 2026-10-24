@@ -62,8 +62,10 @@ export interface ReactionRow {
   collected_at: string;
 }
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE_URL}/api${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
@@ -114,7 +116,7 @@ export const api = {
   // Agent générique fourni par le squelette du cours (pas sous /api, routes
   // d'origine : POST /:agentId/invoke).
   chat: async (message: string, threadId: string): Promise<ChatResponse> => {
-    const res = await fetch('/Agent/invoke', {
+    const res = await fetch(`${API_BASE_URL}/Agent/invoke`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, thread_id: threadId }),
