@@ -21,6 +21,6 @@ services:
       - key: GOOGLE_API_KEY
         sync: false
       - key: GEMINI_MODEL
-        value: gemini-2.5-flash
+        value: gemini-3.8-flash
       - key: TELEGRAM_BOT_TOKEN
         sync: false

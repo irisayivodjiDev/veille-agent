@@ -1,5 +1,4 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatOpenAI } from '@langchain/openai';
 import 'dotenv/config';
 
@@ -8,11 +7,14 @@ import 'dotenv/config';
 // fournisseur du modèle pour tous les agents.
 export function getChatModel(temperature = 0.5, maxTokens = 1024): BaseChatModel {
   if (process.env.GOOGLE_API_KEY) {
-    return new ChatGoogleGenerativeAI({
+    return new ChatOpenAI({
       apiKey: process.env.GOOGLE_API_KEY,
-      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
       temperature,
-      maxOutputTokens: maxTokens,
+      maxTokens,
+      configuration: {
+        baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+      },
     }) as unknown as BaseChatModel;
   }
 
