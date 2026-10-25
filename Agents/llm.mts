@@ -2,6 +2,23 @@ import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { ChatOpenAI } from '@langchain/openai';
 import 'dotenv/config';
 
+// L'endpoint compatible OpenAI de Gemini rejette (400) les champs qu'il ne
+// connaît pas, or @langchain/openai envoie toujours frequency_penalty et
+// presence_penalty. On les retire du corps avant l'envoi.
+const GEMINI_UNSUPPORTED_FIELDS = ['frequency_penalty', 'presence_penalty'];
+
+const geminiFetch: typeof fetch = (input, init) => {
+  if (typeof init?.body === 'string') {
+    const body = JSON.parse(init.body);
+    for (const field of GEMINI_UNSUPPORTED_FIELDS) delete body[field];
+    // Le corps change de taille : on laisse fetch recalculer content-length.
+    const headers = new Headers(init.headers);
+    headers.delete('content-length');
+    init = { ...init, headers, body: JSON.stringify(body) };
+  }
+  return fetch(input, init);
+};
+
 // Utilise Gemini (API gratuite) si une clé est configurée, sinon retombe sur
 // LM Studio en local. Un seul endroit à changer pour faire évoluer le
 // fournisseur du modèle pour tous les agents.
@@ -14,6 +31,7 @@ export function getChatModel(temperature = 0.5, maxTokens = 1024): BaseChatModel
       maxTokens,
       configuration: {
         baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+        fetch: geminiFetch,
       },
     }) as unknown as BaseChatModel;
   }
