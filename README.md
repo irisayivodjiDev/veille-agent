@@ -1,4 +1,4 @@
-# Agent IA de veille technologique — Orastay
+# Agent IA de veille technologique 
 
 Agent IA capable de faire de la veille : capter des sources, les qualifier et
 les ranger automatiquement, les stocker, puis restituer les données avec une
